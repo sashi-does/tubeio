@@ -13,6 +13,7 @@ const playlistSchema = new mongoose.Schema({
     updated_at: {type: Date, default: Date.now}
 });
 
+
 const userPlaylistModel = mongoose.models('userPlaylist') || mongoose.model('userPlaylist', playlistSchema);
 
 export default userPlaylistModel;

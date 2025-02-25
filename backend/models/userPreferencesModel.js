@@ -6,6 +6,6 @@ const userPreferencesSchema = new mongoose.Schema({
     updated_at: {type: Date, default: Date.now}
 });
 
-const userPreferencesModel = mongoose.models('userPreferences') || mongoose.model('userPreferences', userPreferencesSchema);
+const userPreferencesModel = mongoose.models.usersPreferences || mongoose.model('userPreferences', userPreferencesSchema);
 
 export default userPreferencesModel;

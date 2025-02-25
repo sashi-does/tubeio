@@ -6,12 +6,10 @@ import Cookies from 'js-cookie';
 const ProtectedRoute = ({ children }) => {
   const jwtToken = Cookies.get('jwtToken');
 
-  // If no token, redirect to login
   if (!jwtToken) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
-  // If token exists, render the children
   return children;
 };
 

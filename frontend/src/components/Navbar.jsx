@@ -11,7 +11,7 @@ const Navbar = () => {
 
   const onClickLogout = () => {
     Cookies.remove('jwtToken');
-    navigate('/login', { replace: true });
+    navigate('/', { replace: true });
   };
 
   return (

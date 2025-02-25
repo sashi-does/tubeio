@@ -7,13 +7,15 @@ import TrendingPage from './pages/TrendingPage';
 import HomePage from './pages/HomePage';
 import SavedVideosPage from './pages/SavedVIdeosPage';
 import GamingRoute from './pages/GamingPage';
+import LandingPage from './pages/LandingPage';
 
 const App = () => {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/auth" element={<LoginPage />} />
       <Route
-        path="/"
+        path="/feed"
         element={
           <ProtectedRoute>
             <HomePage />

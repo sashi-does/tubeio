@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-import Cookies from "js-cookie";
 import { Search, X } from "lucide-react";
 import Heading from "../components/Heading";
 import context from "../context/Context";
@@ -213,6 +212,7 @@ const FeedPage = ({ param }) => {
         )}
       </div>
     </div>
+    
   );
 };
 

@@ -14,7 +14,7 @@ const typeToIconMap = {
 };
 
 const typeToPathMap = {
-  Home: '/',
+  Home: '/feed',
   Trending: '/trending',
   Gaming: '/gaming',
   'Saved Videos': '/saved-videos',

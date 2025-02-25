@@ -8,9 +8,10 @@ const port = 3000
 
 mongoDB();
 
+app.use(cors());
 app.use(express.json());
 app.use('/auth', userRouter);
-app.use(cors());
+
 
 app.get('/', async (req, res) => {
   res.send('Hello World!')

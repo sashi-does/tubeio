@@ -1,17 +1,32 @@
-import { useContext } from 'react';
+import { useState, useRef, useContext } from 'react';
 import { FaMoon } from 'react-icons/fa';
 import { IoSunnyOutline } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import Constants from '../context/Context';
+import { motion } from 'framer-motion';
 
 const Navbar = () => {
   const { onToggleTheme, theme } = useContext(Constants);
   const navigate = useNavigate();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const userName = "John Doe"; // Replace with actual user data
 
   const onClickLogout = () => {
     Cookies.remove('jwtToken');
     navigate('/', { replace: true });
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  const closeDropdown = (e) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      setDropdownOpen(false);
+    }
   };
 
   return (
@@ -48,30 +63,40 @@ const Navbar = () => {
                 <IoSunnyOutline className="w-6 h-6" />
               )}
             </button>
-            <button 
-              className={`p-2 rounded-full transition-colors ${
-                theme 
-                  ? 'hover:bg-gray-100 text-gray-800' 
-                  : 'hover:bg-gray-800 text-gray-200'
-              }`}
-            >
-              <img
-                alt="profile"
-                className="w-8 h-8 rounded-full"
-                src="https://assets.ccbp.in/frontend/react-js/nxt-watch-profile-img.png"
-              />
-            </button>
-            <button
-              onClick={onClickLogout}
-              type="button"
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200
-                ${theme 
-                  ? 'bg-transparent text-blue-600 border border-blue-600 hover:bg-blue-50' 
-                  : 'bg-transparent text-blue-400 border border-blue-400 hover:bg-blue-900/20'
+            <div className="relative" ref={dropdownRef}>
+              <button 
+                className={`p-2 rounded-full transition-colors ${
+                  theme 
+                    ? 'hover:bg-gray-100 text-gray-800' 
+                    : 'hover:bg-gray-800 text-gray-200'
                 }`}
-            >
-              Logout
-            </button>
+                onClick={toggleDropdown}
+              >
+                <img
+                  alt="profile"
+                  className="w-8 h-8 rounded-full"
+                  src="https://assets.ccbp.in/frontend/react-js/nxt-watch-profile-img.png"
+                />
+              </button>
+              {dropdownOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 mt-2 w-48 p-4 shadow-lg rounded-xl border text-white"
+                  style={{
+                    background: 'linear-gradient(135deg, #0D0F1A, #1A1F38, #101828)',
+                    borderColor: theme ? '#2D3A5F' : '#1A1F38',
+                  }}
+                >
+                  <p className="text-lg font-semibold mb-2">{userName}</p>
+                  <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100/10" onClick={() => navigate('/profile')}>View Profile</button>
+                  <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100/10 mt-2" onClick={() => navigate('/settings')}>Settings</button>
+                  <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-red-100/10 text-red-400 mt-2" onClick={onClickLogout}>Logout</button>
+                </motion.div>
+              )}
+            </div>
           </div>
         </div>
       </div>

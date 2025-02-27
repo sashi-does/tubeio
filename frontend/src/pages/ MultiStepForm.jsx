@@ -1,24 +1,48 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Tag, ChevronLeft, ChevronRight, Check, Plus, X } from 'lucide-react';
 import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const MultiStepForm = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     interests: [],
-    discoveryMethod: '', 
-    customDiscoveryMethod: '', 
-    mainGoal: '', 
+    discoveryMethod: '',
+    customDiscoveryMethod: '',
+    mainGoal: '',
     customGoal: '',
   });
-  const [customInterest, setCustomInterest] = useState(''); 
-  const [error, setError] = useState(''); 
-  const [isSubmitted, setIsSubmitted] = useState(false); 
+  const navigate = useNavigate();
+  const [customInterest, setCustomInterest] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isOnboardingCompleted, setIsOnboardingCompleted] = useState(false);
+  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true); // New state for checking onboarding status
   const interestsRef = useRef(null);
   const discoveryMethodRef = useRef(null);
   const mainGoalRef = useRef(null);
+
+  // Check onboarding status on component mount
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      try {
+        const isCompleted = await isCompletedOnboarding();
+        setIsOnboardingCompleted(isCompleted);
+        if (isCompleted) {
+          navigate('/feed'); // Navigate to /feed if onboarding is completed
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+      } finally {
+        setIsCheckingOnboarding(false); // Set loading state to false after API call
+      }
+    };
+
+    checkOnboardingStatus();
+  }, [navigate]);
 
   const handleInterestClick = (interest) => {
     if (formData.interests.includes(interest)) {
@@ -36,13 +60,13 @@ const MultiStepForm = () => {
 
   const handleCustomInterest = (e) => {
     if (e.key === 'Enter' || e.type === 'click') {
-      e.preventDefault(); 
+      e.preventDefault();
       if (customInterest.trim() && !formData.interests.includes(customInterest)) {
         setFormData({
           ...formData,
           interests: [...formData.interests, customInterest.trim()],
         });
-        setCustomInterest(''); 
+        setCustomInterest('');
       }
     }
   };
@@ -51,7 +75,7 @@ const MultiStepForm = () => {
     setFormData({
       ...formData,
       discoveryMethod: method,
-      customDiscoveryMethod: method === 'Other' ? formData.customDiscoveryMethod : '', 
+      customDiscoveryMethod: method === 'Other' ? formData.customDiscoveryMethod : '',
     });
   };
 
@@ -78,34 +102,33 @@ const MultiStepForm = () => {
   };
 
   const nextStep = () => {
-    setError(''); 
+    setError('');
 
     if (step === 1 && formData.interests.length === 0) {
       setError('Please select at least one interest.');
-      interestsRef.current?.focus(); 
+      interestsRef.current?.focus();
       return;
     }
     if (step === 2 && !formData.discoveryMethod) {
       setError('Please select a discovery method.');
-      discoveryMethodRef.current?.focus(); 
+      discoveryMethodRef.current?.focus();
       return;
     }
     if (step === 2 && formData.discoveryMethod === 'Other' && !formData.customDiscoveryMethod.trim()) {
       setError('Please enter your custom discovery method.');
-      discoveryMethodRef.current?.focus(); 
+      discoveryMethodRef.current?.focus();
       return;
     }
     if (step === 3 && !formData.mainGoal) {
       setError('Please select your main goal.');
-      mainGoalRef.current?.focus(); 
+      mainGoalRef.current?.focus();
       return;
     }
     if (step === 3 && formData.mainGoal === 'Other' && !formData.customGoal.trim()) {
       setError('Please enter your custom goal.');
-      mainGoalRef.current?.focus(); 
+      mainGoalRef.current?.focus();
       return;
     }
-
 
     if (step === 2 && formData.discoveryMethod === 'Other' && formData.customDiscoveryMethod.trim()) {
       setFormData((prev) => ({
@@ -123,20 +146,37 @@ const MultiStepForm = () => {
     }
 
     if (step < 3) {
-      setStep((prev) => prev + 1); 
+      setStep((prev) => prev + 1);
     } else {
-      handleSubmit(); 
+      handleSubmit();
     }
   };
 
   const prevStep = () => setStep((prev) => prev - 1);
 
   const handleSubmit = async () => {
-    setIsSubmitted(true); 
-    console.log("Sashi");
-    const url = "http://localhost:3000/form-update/add-niche";
-    const response = await axios.post(url, formData.interests, {Headers: {authorization: `Bearer ${Cookies.get('jwtToken')}`}});
-    console.log(response);
+    setIsLoading(true);
+    try {
+      const url = import.meta.env.VITE_HANDLE_FORM_API + '/add-niche';
+      const response = await axios.post(url, { niches: formData.interests }, {
+        headers: { authorization: `Bearer ${Cookies.get('jwtToken')}` },
+      });
+      setIsSubmitted(true);
+      const formStatusUrl = import.meta.env.VITE_FORM_STATUS_API + '/complete-step';
+      await axios.patch(formStatusUrl, {}, { headers: { authorization: `Bearer ${Cookies.get('jwtToken')}` } });
+      navigate('/feed');
+    } catch (error) {
+      console.error('Submission failed:', error);
+      setError('Submission failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const isCompletedOnboarding = async () => {
+    const url = import.meta.env.VITE_FORM_STATUS_API + '/status';
+    const response = await axios.get(url, { headers: { authorization: `Bearer ${Cookies.get('jwtToken')}` } });
+    return response.data.form_status; // Ensure the backend returns { form_status: true/false }
   };
 
   const discoveryMethods = [
@@ -155,6 +195,19 @@ const MultiStepForm = () => {
     'Other',
   ];
 
+  // Display loading state while checking onboarding status
+  if (isCheckingOnboarding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-white text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  // If onboarding is completed, don't render the form
+  if (isOnboardingCompleted) {
+    return null; // Or a loading spinner while navigating
+  }
 
   if (isSubmitted) {
     return (
@@ -178,7 +231,6 @@ const MultiStepForm = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
       <div className="max-w-md w-full backdrop-blur-xl bg-gray-800 bg-opacity-50 p-8 rounded-2xl shadow-2xl border border-gray-700">
-
         <div className="flex justify-between items-center mb-8 relative">
           {[1, 2, 3].map((stepNumber, index) => (
             <React.Fragment key={stepNumber}>
@@ -208,7 +260,6 @@ const MultiStepForm = () => {
         </div>
 
         <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-
           {step === 1 && (
             <motion.div
               key={1}
@@ -259,6 +310,7 @@ const MultiStepForm = () => {
               </div>
             </motion.div>
           )}
+
           {step === 2 && (
             <motion.div
               key={2}
@@ -300,6 +352,7 @@ const MultiStepForm = () => {
               )}
             </motion.div>
           )}
+
           {step === 3 && (
             <motion.div
               key={3}
@@ -377,10 +430,17 @@ const MultiStepForm = () => {
               <button
                 type="submit"
                 onClick={handleSubmit}
+                disabled={isLoading}
                 className="flex-1 bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center space-x-2"
               >
-                <span>Submit</span>
-                <Check size={20} />
+                {isLoading ? (
+                  <span>Submitting...</span>
+                ) : (
+                  <>
+                    <span>Submit</span>
+                    <Check size={20} />
+                  </>
+                )}
               </button>
             )}
           </div>

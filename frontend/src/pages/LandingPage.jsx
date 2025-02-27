@@ -17,8 +17,7 @@ const LandingPage = () => {
 
   return (
     <>
-    <MultiStepForm />
-    <p>sas</p>
+    <p>This is Landing Page</p>
     </>
   )
 };

@@ -15,7 +15,7 @@ const FeedPage = ({ param }) => {
   const { theme } = useContext(context);
 
   useEffect(() => {
-    fetchVideos(search || "latest trends");
+    fetchVideos(search || "Entrepreneurship");
   }, []);  
   
   const fetchVideos = async (searchQuery) => {
@@ -155,7 +155,7 @@ const FeedPage = ({ param }) => {
           >
             <div className="relative flex-grow">
               <input
-                type="search"
+                type="text"
                 placeholder="Search videos..."
                 value={search}
                 onChange={onChangeSearch}
@@ -167,7 +167,7 @@ const FeedPage = ({ param }) => {
               {search && (
                 <button
                   onClick={clearSearch}
-                  className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors
+                  className={`absolute cursor-pointer right-2 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors
                     ${
                       theme
                         ? "text-gray-400 hover:text-gray-600 hover:bg-gray-100"

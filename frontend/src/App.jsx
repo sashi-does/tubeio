@@ -8,11 +8,20 @@ import HomePage from './pages/HomePage';
 import SavedVideosPage from './pages/SavedVIdeosPage';
 import GamingRoute from './pages/GamingPage';
 import LandingPage from './pages/LandingPage';
+import MultiStepForm from './pages/ MultiStepForm';
 
 const App = () => {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route
+        path="/complete-step"
+        element={
+          <ProtectedRoute>
+            <MultiStepForm />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/auth" element={<LoginPage />} />
       <Route
         path="/feed"

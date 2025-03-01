@@ -7,8 +7,8 @@ import { MoreVertical, Trash, Download, Share, Move } from 'lucide-react';
 const WatchLaterItem = ({ details, onRemove }) => {
   const { theme } = useContext(Context);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef(null); // Ref for the popup menu
-  const buttonRef = useRef(null); // Ref for the three-dots button
+  const menuRef = useRef(null); 
+  const buttonRef = useRef(null); 
 
   const {
     video_id: id,
@@ -17,20 +17,17 @@ const WatchLaterItem = ({ details, onRemove }) => {
     title,
   } = details;
 
-  // Toggle menu visibility
   const toggleMenu = (e) => {
     e.stopPropagation();
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Handle "Remove from Watch Later" action
   const handleRemove = (e) => {
     e.stopPropagation();
     onRemove(id);
     setIsMenuOpen(false);
   };
 
-  // Close the menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -43,12 +40,11 @@ const WatchLaterItem = ({ details, onRemove }) => {
       }
     };
 
-    // Add event listener when the menu is open
     if (isMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
-    // Cleanup the event listener
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -56,14 +52,11 @@ const WatchLaterItem = ({ details, onRemove }) => {
 
   return (
     <li className="my-[20px] w-full flex items-center gap-4 p-2 hover:bg-gray-800 rounded-lg cursor-pointer">
-      {/* Drag handle */}
       <div className="cursor-grab text-gray-500" onClick={(e) => e.stopPropagation()}>
         ≡
       </div>
 
-      {/* Thumbnail and video details wrapped in Link */}
       <Link to={`/videos/${id}`} className="flex flex-grow items-center gap-4">
-        {/* Thumbnail */}
         <div className="relative flex-shrink-0 h-24 w-40">
           <img
             alt={title}
@@ -72,7 +65,6 @@ const WatchLaterItem = ({ details, onRemove }) => {
           />
         </div>
 
-        {/* Video details */}
         <div className="flex-grow">
           <h3 className="text-sm font-medium text-white line-clamp-2">
             {title}
@@ -83,7 +75,6 @@ const WatchLaterItem = ({ details, onRemove }) => {
         </div>
       </Link>
 
-      {/* Options menu (not wrapped in Link) */}
       <div className="relative" ref={buttonRef}>
         <button
           className="p-2 text-gray-400 hover:text-white"
@@ -92,7 +83,6 @@ const WatchLaterItem = ({ details, onRemove }) => {
           <MoreVertical size={18} />
         </button>
 
-        {/* Popup menu */}
         {isMenuOpen && (
           <div
             ref={menuRef}
@@ -101,7 +91,6 @@ const WatchLaterItem = ({ details, onRemove }) => {
             } animate-fade-in`}
           >
             <div className="py-1">
-              {/* Remove from Watch Later */}
               <button
                 className={`w-full flex items-center px-4 py-2 text-sm ${
                   theme ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-200 hover:bg-gray-700'
@@ -111,7 +100,6 @@ const WatchLaterItem = ({ details, onRemove }) => {
                 <Trash className="w-4 h-4 mr-2" />
                 Remove from Watch Later
               </button>
-              {/* Download */}
               <button
                 className={`w-full flex items-center px-4 py-2 text-sm ${
                   theme ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-200 hover:bg-gray-700'
@@ -121,7 +109,6 @@ const WatchLaterItem = ({ details, onRemove }) => {
                 <Download className="w-4 h-4 mr-2" />
                 Download
               </button>
-              {/* Share */}
               <button
                 className={`w-full flex items-center px-4 py-2 text-sm ${
                   theme ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-200 hover:bg-gray-700'
@@ -131,7 +118,6 @@ const WatchLaterItem = ({ details, onRemove }) => {
                 <Share className="w-4 h-4 mr-2" />
                 Share
               </button>
-              {/* Move to top */}
               <button
                 className={`w-full flex items-center px-4 py-2 text-sm ${
                   theme ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-200 hover:bg-gray-700'
@@ -141,7 +127,6 @@ const WatchLaterItem = ({ details, onRemove }) => {
                 <Move className="w-4 h-4 mr-2" />
                 Move to top
               </button>
-              {/* Move to bottom */}
               <button
                 className={`w-full flex items-center px-4 py-2 text-sm ${
                   theme ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-200 hover:bg-gray-700'

@@ -8,7 +8,7 @@ const HomePage = () => (
     <Navbar />
     <div className="flex flex-grow">
       <LeftNavbar />
-      <div>
+      <div className='flex-grow'>
         <FeedPage param="all"/>
       </div>
     </div>

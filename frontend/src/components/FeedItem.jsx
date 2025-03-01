@@ -17,7 +17,7 @@ const typeToPathMap = {
   Home: '/feed',
   Trending: '/trending',
   Gaming: '/gaming',
-  'Saved Videos': '/saved-videos',
+  'Saved Videos': '/watch-later',
 };
 
 const FeedItem = ({ details, onChangeItem }) => {

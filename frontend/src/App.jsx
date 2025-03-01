@@ -5,7 +5,7 @@ import LoginPage from './pages/LoginPage';
 import DetailedVideoPage from './pages/DetailedVideoPage';
 import TrendingPage from './pages/TrendingPage';
 import HomePage from './pages/HomePage';
-import SavedVideosPage from './pages/SavedVIdeosPage';
+import WatchLaterPage from './pages/WatchLaterPage';
 import GamingRoute from './pages/GamingPage';
 import LandingPage from './pages/LandingPage';
 import MultiStepForm from './pages/ MultiStepForm';
@@ -48,10 +48,10 @@ const App = () => {
         }
       />
       <Route
-        path="/saved-videos"
+        path="/watch-later"
         element={
           <ProtectedRoute>
-            <SavedVideosPage />
+            <WatchLaterPage />
           </ProtectedRoute>
         }
       />

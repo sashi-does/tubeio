@@ -9,6 +9,7 @@ import WatchLaterPage from './pages/WatchLaterPage';
 import GamingRoute from './pages/GamingPage';
 import LandingPage from './pages/LandingPage';
 import MultiStepForm from './pages/ MultiStepForm';
+import './index.css';
 
 const App = () => {
   return (

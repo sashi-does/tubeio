@@ -3,6 +3,7 @@ import { Search, X } from "lucide-react";
 import Heading from "../components/Heading";
 import context from "../context/Context";
 import VideoItem from "../components/VideoItem";
+import FilterSection from "./FilterSection";
 import axios from "axios";
 const apiKey = import.meta.env.VITE_YOUTUBE_DATA_API_KEY;
 const apiUrl = import.meta.env.VITE_YOUTUBE_SEARCH_API;
@@ -139,7 +140,7 @@ const FeedPage = ({ param }) => {
             </div>
           </div>
         )}
-
+      <FilterSection />
         <div className="mb-8">
           <Heading name={param} />
         </div>
@@ -159,7 +160,7 @@ const FeedPage = ({ param }) => {
                 placeholder="Search videos..."
                 value={search}
                 onChange={onChangeSearch}
-                onKeyDown={(e) => e.key === "Enter" && submitHandler(e)} // Detect Enter key
+                onKeyDown={(e) => e.key === "Enter" && submitHandler(e)} 
                 className={`w-full pl-4 pr-10 py-3 rounded-l-lg border-0 outline-none transition-colors${theme
                   ? "bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500/20"
                   : "bg-gray-800 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-primary-500/20"}`} 

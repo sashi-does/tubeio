@@ -1,18 +1,46 @@
-import { useState, useRef, useContext } from 'react';
+import { useState, useRef, useContext, useEffect } from 'react';
 import { FaMoon } from 'react-icons/fa';
 import { IoSunnyOutline } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import Constants from '../context/Context';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
 const Navbar = () => {
   const { onToggleTheme, theme } = useContext(Constants);
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [username, setUsername] = useState('');
+  const [loading, setLoading] = useState(true); 
+  const url = import.meta.env.VITE_TUBEIO_USER_API + '/username';
 
-  const userName = "John Doe"; // Replace with actual user data
+  const getUsername = async () => {
+    try {
+      const response = await axios.get(url, {
+        headers: { authorization: `Bearer ${Cookies.get('jwtToken')}` },
+      });
+      console.log(response.data.username); // Debug the API response
+      setUsername(response.data.username || 'Guest'); // Fallback to 'Guest' if username is missing
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setUsername('Guest'); // Fallback to 'Guest' on error
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+
+  useEffect(() => {
+    getUsername();
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('mousedown', closeDropdown);
+    return () => {
+      document.removeEventListener('mousedown', closeDropdown);
+    };
+  }, []);
 
   const onClickLogout = () => {
     Cookies.remove('jwtToken');
@@ -46,6 +74,7 @@ const Navbar = () => {
               }
             />
           </div>
+          
           <div className="flex items-center space-x-4">
             <button
               onClick={onToggleTheme}
@@ -90,10 +119,18 @@ const Navbar = () => {
                     borderColor: theme ? '#2D3A5F' : '#1A1F38',
                   }}
                 >
-                  <p className="text-lg font-semibold mb-2">{userName}</p>
-                  <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100/10" onClick={() => navigate('/profile')}>View Profile</button>
-                  <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100/10 mt-2" onClick={() => navigate('/settings')}>Settings</button>
-                  <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-red-100/10 text-red-400 mt-2" onClick={onClickLogout}>Logout</button>
+                  {loading ? (
+                    <div className="flex justify-center items-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-lg font-semibold mb-2">{username}</p>
+                      <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100/10" onClick={() => navigate('/profile')}>View Profile</button>
+                      <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100/10 mt-2" onClick={() => navigate('/settings')}>Settings</button>
+                      <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-red-100/10 text-red-400 mt-2" onClick={onClickLogout}>Logout</button>
+                    </>
+                  )}
                 </motion.div>
               )}
             </div>

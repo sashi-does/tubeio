@@ -5,6 +5,7 @@ const Context = createContext({
   onToggleTheme: () => {}, 
   savedVideos: [],
   addSavedVideos: () => {}, 
+  searchValue: "",
 });
 
 export const ContextProvider = ({ children }) => {
@@ -15,7 +16,6 @@ export const ContextProvider = ({ children }) => {
     setIsDarkTheme((prev) => !prev);
   };
 
-  // Function to add a video to saved videos
   const addSavedVideos = (videoItem) => {
     setSavedVideos((prev) => [...prev, videoItem]);
   };

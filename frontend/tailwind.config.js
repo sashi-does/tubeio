@@ -1,12 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './src/**/*.{js,jsx,ts,tsx}', // Make sure the content path covers your project
-  ],
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        border: 'hsl(240, 5%, 84%)',
+        'primary-blue': {
+          DEFAULT: '#162142', // Main shade
+          600: '#0F1A34', // Darker shade for hover
+          400: '#2A3664', // Lighter shade for icons
+        },
       },
     },
   },

@@ -20,7 +20,6 @@ const addNiche = async (req, res) => {
 
     try {
         const payload = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(payload);
 
         const updated_at = Date.now();
         const newNiche = new userPreferencesModel({ user_id: payload.id, niches, updated_at });
@@ -35,10 +34,20 @@ const addNiche = async (req, res) => {
     }
 };
 
-const updateNiches = () => {}
+const updateNiches = (req,res) => {}
 
-const getNiches = () => {}
+const getNiches = async (req,res) => {
+    const token = req.headers.authorization.split(" ")[1];
+    console.log(token)
+    const id = jwt.verify(token, process.env.JWT_SECRET).id;
+    console.log(id)
+    const user = await userPreferencesModel.findOne({user_id: id});
+    console.log(user);
+    res.status(200).json({niches: user.niches });
+}
 
 const updateTheme = () => {}
+
+
 
 export {addNiche, updateNiches, getNiches, updateTheme};

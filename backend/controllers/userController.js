@@ -2,9 +2,8 @@ import sql from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const createToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-
+const createToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
 const hashPassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
@@ -15,12 +14,15 @@ const createUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    if (!username) return res.status(400).json({ message: "Username is required" });
+    if (!username)
+      return res.status(400).json({ message: "Username is required" });
     if (!email) return res.status(400).json({ message: "Email is required" });
-    if (!password) return res.status(400).json({ message: "Password is required" });
+    if (!password)
+      return res.status(400).json({ message: "Password is required" });
 
     const user = await sql`SELECT * FROM users WHERE email = ${email}`;
-    if (user.length !== 0) return res.status(409).json({ message: "Email already exists" });
+    if (user.length !== 0)
+      return res.status(409).json({ message: "Email already exists" });
 
     const hashedPassword = await hashPassword(password);
     await sql`INSERT INTO users (username, email, password) VALUES (${username}, ${email}, ${hashedPassword})`;
@@ -34,27 +36,40 @@ const createUser = async (req, res) => {
   }
 };
 
-
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email) return res.status(400).json({ message: "Email is required" });
-    if (!password) return res.status(400).json({ message: "Password is required" });
+    if (!password)
+      return res.status(400).json({ message: "Password is required" });
 
     const user = await sql`SELECT * FROM users WHERE email = ${email}`;
-    if (user.length === 0) return res.status(401).json({ message: "Email not found" });
+    if (user.length === 0)
+      return res.status(401).json({ message: "Email not found" });
 
     const isMatch = await bcrypt.compare(password, user[0].password);
-    if (!isMatch) return res.status(401).json({ message: "Incorrect Password" });
+    if (!isMatch)
+      return res.status(401).json({ message: "Incorrect Password" });
 
     const token = createToken(user[0].id);
     res.status(200).json({ message: "Login Successful", token });
   } catch (e) {
-    console.error("Login Error:", e); 
+    console.error("Login Error:", e);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
+const getUsername = async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    const userId = jwt.verify(token, process.env.JWT_SECRET).id;
+    const user = await sql`SELECT username FROM users WHERE id = ${userId}`;
+    console.log(user);
+    res.status(200).json({ username: user[0].username});
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
 
-export { createUser, loginUser };
+export { createUser, loginUser, getUsername };

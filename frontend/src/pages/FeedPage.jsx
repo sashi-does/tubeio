@@ -5,28 +5,27 @@ import context from "../context/Context";
 import VideoItem from "../components/VideoItem";
 import FilterSection from "./FilterSection";
 import axios from "axios";
+
 const apiKey = import.meta.env.VITE_YOUTUBE_DATA_API_KEY;
 const apiUrl = import.meta.env.VITE_YOUTUBE_SEARCH_API;
 
 const FeedPage = ({ param }) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Changed to false initially
   const [videos, setVideos] = useState([]);
   const [search, setSearch] = useState("");
   const [showPremium, setShowPremium] = useState(true);
+  const [selectedFilter, setSelectedFilter] = useState([]);
   const { theme } = useContext(context);
 
-  useEffect(() => {
-    fetchVideos(search || "Entrepreneurship");
-  }, []);  
-  
-  const fetchVideos = async (searchQuery) => {
+  const fetchVideos = async (query) => {
     setIsLoading(true);
     try {
-      const query = searchQuery || "latest trends";
-      const url = `${apiUrl}?key=${apiKey}&q=${query}&part=snippet&type=video&maxResults=40`;
+      const searchQuery =
+        query || (selectedFilter.length > 0 ? selectedFilter[0] : "Entrepreneurship");
+      const url = `${apiUrl}?key=${apiKey}&q=${searchQuery}&part=snippet&type=video&maxResults=40`;
       const response = await axios.get(url);
       const videos = response.data.items;
-  
+
       const modifiedData = videos.map((videoItem) => ({
         id: videoItem.id.videoId,
         title: videoItem.snippet.title,
@@ -40,12 +39,24 @@ const FeedPage = ({ param }) => {
       }));
       setVideos(modifiedData);
     } catch (e) {
-      console.log("Error occurred");
+      console.log("Error occurred:", e);
     } finally {
       setIsLoading(false);
     }
   };
-  
+
+  useEffect(() => {
+    fetchVideos("Entrepreneurship"); // Initial fetch
+  }, []);
+
+  useEffect(() => {
+    if (selectedFilter.length > 0) {
+      fetchVideos(selectedFilter[0]); // Fetch when filter changes
+    } else if (!search) {
+      fetchVideos("Entrepreneurship"); // Default to "Entrepreneurship" if no filter or search
+    }
+  }, [selectedFilter]);
+
   const submitHandler = (e) => {
     e.preventDefault();
     if (!search.trim()) {
@@ -65,18 +76,13 @@ const FeedPage = ({ param }) => {
 
   const clearSearch = () => {
     setSearch("");
+    fetchVideos(selectedFilter.length > 0 ? selectedFilter[0] : "Entrepreneurship");
   };
 
-  if (isLoading) {
-    return (
-      <div className={`flex items-center justify-center min-h-screen`}>
-        <div className="animate-pulse-slow">
-          <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      </div>
-    );
-  }
-  console.log(search);
+  const handleFilterChange = (filter) => {
+    setSelectedFilter(filter);
+  };
+
   return (
     <div
       className={`mt-[64px] min-h-screen flex-grow overflow-y-auto ${
@@ -99,27 +105,15 @@ const FeedPage = ({ param }) => {
                     theme ? "bg-amber-100" : "bg-amber-900/40"
                   }`}
                 >
-                  <span
-                    className={`text-lg ${
-                      theme ? "text-amber-600" : "text-amber-400"
-                    }`}
-                  >
+                  <span className={`text-lg ${theme ? "text-amber-600" : "text-amber-400"}`}>
                     ✨
                   </span>
                 </div>
                 <div>
-                  <p
-                    className={`text-sm font-medium ${
-                      theme ? "text-amber-800" : "text-amber-200"
-                    }`}
-                  >
+                  <p className={`text-sm font-medium ${theme ? "text-amber-800" : "text-amber-200"}`}>
                     Premium Content Available
                   </p>
-                  <p
-                    className={`text-xs ${
-                      theme ? "text-amber-600" : "text-amber-400"
-                    }`}
-                  >
+                  <p className={`text-xs ${theme ? "text-amber-600" : "text-amber-400"}`}>
                     Unlock exclusive videos and features
                   </p>
                 </div>
@@ -140,30 +134,28 @@ const FeedPage = ({ param }) => {
             </div>
           </div>
         )}
-      <FilterSection />
+        <FilterSection
+          onFilterChange={handleFilterChange}
+          selectedFilter={selectedFilter}
+        />
         <div className="mb-8">
           <Heading name={param} />
         </div>
 
-        <form
-          onSubmit={(e) => submitHandler(e)}
-          className="relative max-w-2xl mb-8"
-        >
-          <div
-            className={`flex items-center rounded-lg shadow-sm ${
-              theme ? "bg-white" : "bg-gray-800"
-            }`}
-          >
+        <form onSubmit={submitHandler} className="relative max-w-2xl mb-8">
+          <div className={`flex items-center rounded-lg shadow-sm ${theme ? "bg-white" : "bg-gray-800"}`}>
             <div className="relative flex-grow">
               <input
                 type="text"
                 placeholder="Search videos..."
                 value={search}
                 onChange={onChangeSearch}
-                onKeyDown={(e) => e.key === "Enter" && submitHandler(e)} 
-                className={`w-full pl-4 pr-10 py-3 rounded-l-lg border-0 outline-none transition-colors${theme
-                  ? "bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500/20"
-                  : "bg-gray-800 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-primary-500/20"}`} 
+                onKeyDown={(e) => e.key === "Enter" && submitHandler(e)}
+                className={`w-full pl-4 pr-10 py-3 rounded-l-lg border-0 outline-none transition-colors ${
+                  theme
+                    ? "bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500/20"
+                    : "bg-gray-800 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-primary-500/20"
+                }`}
               />
               {search && (
                 <button
@@ -192,28 +184,32 @@ const FeedPage = ({ param }) => {
           </div>
         </form>
 
-        {videos.length > 0 ? (
-          <ul className="list-none grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {videos.map((video) => (
-              <VideoItem key={video.id} param={param} details={video} />
-            ))}
-          </ul>
-        ) : (
-          <div
-            className={`text-center py-16 ${
-              theme ? "text-gray-500" : "text-gray-400"
-            }`}
-          >
-            <Search className="w-16 h-16 mx-auto mb-4 opacity-40" />
-            <h3 className="text-lg font-medium mb-2">No videos found</h3>
-            <p className="text-sm">
-              Try adjusting your search to find what you're looking for.
-            </p>
-          </div>
-        )}
+        {/* Videos Section with Conditional Loader */}
+        <div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="animate-pulse-slow">
+                <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            </div>
+          ) : videos.length > 0 ? (
+            <ul className="list-none grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {videos.map((video) => (
+                <VideoItem key={video.id} param={param} details={video} />
+              ))}
+            </ul>
+          ) : (
+            <div className={`text-center py-16 ${theme ? "text-gray-500" : "text-gray-400"}`}>
+              <Search className="w-16 h-16 mx-auto mb-4 opacity-40" />
+              <h3 className="text-lg font-medium mb-2">No videos found</h3>
+              <p className="text-sm">
+                Try adjusting your search or filter to find what you're looking for.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
-    
   );
 };
 

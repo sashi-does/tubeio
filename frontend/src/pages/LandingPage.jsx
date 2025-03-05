@@ -31,102 +31,121 @@ function App() {
 
   const scrollToSection = (elementRef) => {
     setMobileMenuOpen(false);
-    window.scrollTo({
-      top: elementRef.current.offsetTop - 100,
-      behavior: "smooth",
-    });
+    if (elementRef.current) {
+      window.scrollTo({
+        top: elementRef.current.offsetTop - 100,
+        behavior: "smooth",
+      });
+    }
   };
 
   useEffect(() => {
-    gsap.fromTo(
-      ".hero-title",
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 1, ease: "power3.out" }
-    );
+    console.log("App component mounted"); 
 
-    gsap.fromTo(
-      ".hero-subtitle",
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 1, delay: 0.3, ease: "power3.out" }
-    );
+    try {
+      gsap.fromTo(
+        ".hero-title",
+        { opacity: 0, y: 50 },
+        { opacity: 1, y: 0, duration: 1, ease: "power3.out" }
+      );
+      gsap.fromTo(
+        ".hero-subtitle",
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 1, delay: 0.3, ease: "power3.out" }
+      );
+      gsap.fromTo(
+        ".hero-cta",
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 1, delay: 0.6, ease: "power3.out" }
+      );
+      gsap.fromTo(
+        ".hero-image",
+        { opacity: 0, scale: 0.9 },
+        { opacity: 1, scale: 1, duration: 1.2, delay: 0.3, ease: "power3.out" }
+      );
 
-    gsap.fromTo(
-      ".hero-cta",
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 1, delay: 0.6, ease: "power3.out" }
-    );
-
-    gsap.fromTo(
-      ".hero-image",
-      { opacity: 0, scale: 0.9 },
-      { opacity: 1, scale: 1, duration: 1.2, delay: 0.3, ease: "power3.out" }
-    );
-
-    gsap.from(".how-it-works-card", {
-      scrollTrigger: {
-        trigger: howItWorksRef.current,
-        start: "top 80%",
-      },
-      y: 50,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.2,
-      ease: "power3.out",
-    });
-
-    gsap.from(".feature-card", {
-      scrollTrigger: {
-        trigger: featuresRef.current,
-        start: "top 80%",
-      },
-      y: 50,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.2,
-      ease: "power3.out",
-    });
-
-    gsap.from(".testimonial-card", {
-      scrollTrigger: {
-        trigger: testimonialsRef.current,
-        start: "top 80%",
-      },
-      y: 30,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.2,
-      ease: "power3.out",
-    });
-
-    gsap.from(".cta-content", {
-      scrollTrigger: {
-        trigger: ctaRef.current,
-        start: "top 80%",
-      },
-      y: 30,
-      opacity: 0,
-      duration: 0.8,
-      ease: "power3.out",
-    });
-
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        headerRef.current?.classList.add(
-          "bg-gray-900/95",
-          "backdrop-blur-md",
-          "shadow-lg"
-        );
-      } else {
-        headerRef.current?.classList.remove(
-          "bg-gray-900/95",
-          "backdrop-blur-md",
-          "shadow-lg"
-        );
+      // Scroll-triggered animations with null checks
+      if (howItWorksRef.current) {
+        gsap.from(".how-it-works-card", {
+          scrollTrigger: {
+            trigger: howItWorksRef.current,
+            start: "top 80%",
+          },
+          y: 50,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.2,
+          ease: "power3.out",
+        });
       }
-    };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+      if (featuresRef.current) {
+        gsap.from(".feature-card", {
+          scrollTrigger: {
+            trigger: featuresRef.current,
+            start: "top 80%",
+          },
+          y: 50,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.2,
+          ease: "power3.out",
+        });
+      }
+
+      if (testimonialsRef.current) {
+        gsap.from(".testimonial-card", {
+          scrollTrigger: {
+            trigger: testimonialsRef.current,
+            start: "top 80%",
+          },
+          y: 30,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.2,
+          ease: "power3.out",
+        });
+      }
+
+      if (ctaRef.current) {
+        gsap.from(".cta-content", {
+          scrollTrigger: {
+            trigger: ctaRef.current,
+            start: "top 80%",
+          },
+          y: 30,
+          opacity: 0,
+          duration: 0.8,
+          ease: "power3.out",
+        });
+      }
+
+      const handleScroll = () => {
+        if (headerRef.current) {
+          if (window.scrollY > 50) {
+            headerRef.current.classList.add(
+              "bg-gray-900/95",
+              "backdrop-blur-md",
+              "shadow-lg"
+            );
+          } else {
+            headerRef.current.classList.remove(
+              "bg-gray-900/95",
+              "backdrop-blur-md",
+              "shadow-lg"
+            );
+          }
+        }
+      };
+
+      window.addEventListener("scroll", handleScroll);
+      return () => {
+        window.removeEventListener("scroll", handleScroll);
+        ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      };
+    } catch (error) {
+      console.error("Error in GSAP animations:", error);
+    }
   }, []);
 
   return (
@@ -141,10 +160,13 @@ function App() {
       >
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <Play className="h-8 w-8 text-purple-400 fill-purple-400" />
-            <span className="text-2xl font-bold">
-              tube<span className="text-purple-300">io</span>
-            </span>
+            <img
+              src="https://res.cloudinary.com/dvukdxs2m/image/upload/v1739785683/tubeio-dark_huj4uc.png"
+              alt="website logo"
+              className="h-8 w-auto"
+              loading="lazy"
+              onError={(e) => (e.target.src = "/fallback-logo.png")} // Add a fallback image
+            />
           </div>
 
           <nav className="hidden md:flex items-center space-x-8">
@@ -168,7 +190,7 @@ function App() {
             </button>
             <button
               onClick={() => navigate("/auth")}
-              className="bg-gradient-to-r from-gray-500 to-blue-500 text-white px-5 py-2 rounded-lg font-semibold text-lg hover:from-gray-600 hover:to-blue-600 transition-colors"
+              className="cursor-pointer bg-gradient-to-r from-[#263580] to-blue-500 text-white px-5 py-2 rounded-lg font-semibold text-lg hover:from-blue-600 hover:to-[#263580] transition-colors"
             >
               Login
             </button>
@@ -202,11 +224,11 @@ function App() {
             >
               Testimonials
             </button>
-            <button className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors w-full">
-              Log in
-            </button>
-            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors w-full">
-              Sign up
+            <button
+              onClick={() => navigate("/auth")}
+              className="cursor-pointer bg-gradient-to-r from-[#263580] to-blue-500 text-white px-5 py-2 rounded-lg font-semibold text-lg hover:from-blue-600 hover:to-[#263580] transition-colors"
+            >
+              Login
             </button>
           </div>
         )}
@@ -218,22 +240,23 @@ function App() {
       >
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="hero-title text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+            <h1 className="hero-title text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 tracking-tight">
               Focus on content that{" "}
-              <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                matters
+              <span className="relative">
+                <span className="bg-gradient-to-r from-[#1b4ed0] to-[#5473c1] bg-clip-text text-transparent">
+                  matters
+                </span>
+                <span className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-[#1b4ed0] to-[#5473c1] opacity-50"></span>
               </span>
             </h1>
-            <p className="hero-subtitle text-lg md:text-xl text-gray-300 mb-8 max-w-lg">
+            <p className="hero-subtitle text-lg md:text-xl text-gray-300 mb-8 max-w-lg leading-relaxed">
               TubeIO eliminates distractions and helps you discover productive
               video content tailored to your interests.
             </p>
             <div className="hero-cta flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <button className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                Get Started — It's Free
-              </button>
-              <button className="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                See How It Works
+              <button className="relative px-4 py-3 rounded-lg w-[140px] cursor-pointer transition-all duration-300 ease-in-out bg-gradient-to-r from-[#2563eb] to-[#3b82f6] text-white font-medium shadow-lg hover:from-[#1e40af] hover:to-[#1d4ed8] hover:scale-105 active:scale-95 overflow-hidden group">
+                <span className="relative z-10">Get Started</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 ease-in-out transform -translate-x-full group-hover:translate-x-0"></div>
               </button>
             </div>
           </div>
@@ -247,7 +270,7 @@ function App() {
             </div>
             <div className="absolute -bottom-6 -right-6 bg-gray-800/50 backdrop-blur-md p-4 rounded-lg animate-levitate">
               <div className="flex items-center space-x-2">
-                <Shield className="h-5 w-5 text-purple-400" />
+                <Shield className="h-5 w-5 text-blue-400" />
                 <span className="text-sm font-medium">
                   Distraction-free viewing
                 </span>
@@ -255,7 +278,7 @@ function App() {
             </div>
             <div className="absolute -top-6 -left-6 bg-gray-800/50 backdrop-blur-md p-4 rounded-lg animate-levitate animation-delay-1000">
               <div className="flex items-center space-x-2">
-                <Zap className="h-5 w-5 text-purple-400" />
+                <Zap className="h-5 w-5 text-blue-400" />
                 <span className="text-sm font-medium">Focused content</span>
               </div>
             </div>
@@ -279,8 +302,8 @@ function App() {
 
         <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
           <div className="how-it-works-card bg-gray-800/50 backdrop-blur-md p-8 rounded-xl text-center">
-            <div className="bg-purple-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Shield className="h-8 w-8 text-purple-400" />
+            <div className="bg-blue-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Shield className="h-8 w-8 text-blue-400" />{" "}
             </div>
             <h3 className="text-xl font-bold mb-4">Distraction-Free UI</h3>
             <p className="text-gray-300">
@@ -290,8 +313,8 @@ function App() {
           </div>
 
           <div className="how-it-works-card bg-gray-800/50 backdrop-blur-md p-8 rounded-xl text-center">
-            <div className="bg-purple-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Zap className="h-8 w-8 text-purple-400" />
+            <div className="bg-blue-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Zap className="h-8 w-8 text-blue-400" />{" "}
             </div>
             <h3 className="text-xl font-bold mb-4">Personalized Feed</h3>
             <p className="text-gray-300">
@@ -301,8 +324,8 @@ function App() {
           </div>
 
           <div className="how-it-works-card bg-gray-800/50 backdrop-blur-md p-8 rounded-xl text-center">
-            <div className="bg-purple-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Users className="h-8 w-8 text-purple-400" />
+            <div className="bg-blue-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Users className="h-8 w-8 text-blue-400" />{" "}
             </div>
             <h3 className="text-xl font-bold mb-4">
               Focus-Driven Recommendations
@@ -327,226 +350,93 @@ function App() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12">
-            <div className="feature-card bg-gray-800/50 backdrop-blur-md p-8 rounded-xl">
-              <div className="flex items-start space-x-4">
-                <div className="bg-purple-500/10 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Compass className="h-6 w-6 text-purple-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-3">
-                    Personalized Niche-Based Feed
-                  </h3>
-                  <p className="text-gray-300 mb-4">
-                    Select your interests, and TubeIO curates relevant,
-                    high-quality videos tailored specifically to you.
-                  </p>
-                  <ul className="space-y-2">
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Interest-based content curation
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Quality-focused recommendations
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Personalized learning paths
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="feature-card bg-gray-800/50 backdrop-blur-md p-8 rounded-xl">
-              <div className="flex items-start space-x-4">
-                <div className="bg-purple-500/10 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Shield className="h-6 w-6 text-purple-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-3">
-                    Distraction-Free Experience
-                  </h3>
-                  <p className="text-gray-300 mb-4">
-                    No entertainment mode, no clutter—just focused content that
-                    helps you achieve your goals.
-                  </p>
-                  <ul className="space-y-2">
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Clean, minimal interface
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        No addictive recommendation loops
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Focus-enhancing viewing mode
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="feature-card bg-gray-800/50 backdrop-blur-md p-8 rounded-xl">
-              <div className="flex items-start space-x-4">
-                <div className="bg-purple-500/10 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Layers className="h-6 w-6 text-purple-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-3">
-                    Multi-Step Onboarding
-                  </h3>
-                  <p className="text-gray-300 mb-4">
-                    Answer a few questions to tailor your experience and get a
-                    perfectly customized content feed from day one.
-                  </p>
-                  <ul className="space-y-2">
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Personalized setup process
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Interest and goal mapping
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Continuous preference learning
-                      </span>
-                    </li>
-                  </ul>
+          <div className="grid md:grid-cols-2 gap-8">
+            {[
+              {
+                Icon: Compass,
+                title: "Personalized Niche-Based Feed",
+                desc: "Select your interests, and TubeIO curates relevant, high-quality videos tailored specifically to you.",
+                items: [
+                  "Interest-based content curation",
+                  "Quality-focused recommendations",
+                  "Personalized learning paths",
+                ],
+              },
+              {
+                Icon: Shield,
+                title: "Distraction-Free Experience",
+                desc: "No entertainment mode, no clutter—just focused content that helps you achieve your goals.",
+                items: [
+                  "Clean, minimal interface",
+                  "No addictive recommendation loops",
+                  "Focus-enhancing viewing mode",
+                ],
+              },
+              {
+                Icon: Layers,
+                title: "Multi-Step Onboarding",
+                desc: "Answer a few questions to tailor your experience and get a perfectly customized content feed from day one.",
+                items: [
+                  "Personalized setup process",
+                  "Interest and goal mapping",
+                  "Continuous preference learning",
+                ],
+              },
+              {
+                Icon: Lightbulb,
+                title: "Daily Motivation Card",
+                desc: "Start each day with a small boost of inspiration through proverbs or motivational quotes.",
+                items: [
+                  "Personalized daily inspiration",
+                  "Goal-aligned motivational content",
+                  "Shareable wisdom cards",
+                ],
+              },
+              {
+                Icon: Search,
+                title: "Smart Search & Categorization",
+                desc: "Easily find the best content within your niche with intelligent search and organization tools.",
+                items: [
+                  "Advanced content filtering",
+                  "Topic-based organization",
+                  "Quality-ranked search results",
+                ],
+              },
+              {
+                Icon: MessageSquare,
+                title: "Progress Tracking",
+                desc: "Track your learning journey and see how you're growing with detailed insights and progress reports.",
+                items: [
+                  "Learning analytics",
+                  "Topic mastery tracking",
+                  "Weekly focus reports",
+                ],
+              },
+            ].map((feature, index) => (
+              <div
+                key={index}
+                className="feature-card group bg-gray-800/50 backdrop-blur-md p-8 rounded-xl relative overflow-hidden transition-all duration-300 hover:shadow-xl"
+              >
+                <div className="absolute inset-0 bg-blue-500/10 transform scale-0 group-hover:scale-100 transition-transform duration-300 origin-center rounded-xl"></div>
+                <div className="relative z-10 flex items-start space-x-4">
+                  <div className="bg-blue-500/10 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-blue-500/20 transition-colors duration-300">
+                    <feature.Icon className="h-6 w-6 text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+                    <p className="text-gray-300 mb-4">{feature.desc}</p>
+                    <ul className="space-y-2">
+                      {feature.items.map((item, i) => (
+                        <li key={i} className="flex items-center space-x-2">
+                          <CheckCircle className="h-4 w-4 text-blue-400" />
+                          <span className="text-sm text-gray-300">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="feature-card bg-gray-800/50 backdrop-blur-md p-8 rounded-xl">
-              <div className="flex items-start space-x-4">
-                <div className="bg-purple-500/10 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Lightbulb className="h-6 w-6 text-purple-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-3">
-                    Daily Motivation Card
-                  </h3>
-                  <p className="text-gray-300 mb-4">
-                    Start each day with a small boost of inspiration through
-                    proverbs or motivational quotes.
-                  </p>
-                  <ul className="space-y-2">
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Personalized daily inspiration
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Goal-aligned motivational content
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Shareable wisdom cards
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="feature-card bg-gray-800/50 backdrop-blur-md p-8 rounded-xl">
-              <div className="flex items-start space-x-4">
-                <div className="bg-purple-500/10 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Search className="h-6 w-6 text-purple-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-3">
-                    Smart Search & Categorization
-                  </h3>
-                  <p className="text-gray-300 mb-4">
-                    Easily find the best content within your niche with
-                    intelligent search and organization tools.
-                  </p>
-                  <ul className="space-y-2">
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Advanced content filtering
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Topic-based organization
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Quality-ranked search results
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="feature-card bg-gray-800/50 backdrop-blur-md p-8 rounded-xl">
-              <div className="flex items-start space-x-4">
-                <div className="bg-purple-500/10 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                  <MessageSquare className="h-6 w-6 text-purple-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-3">Progress Tracking</h3>
-                  <p className="text-gray-300 mb-4">
-                    Track your learning journey and see how you're growing with
-                    detailed insights and progress reports.
-                  </p>
-                  <ul className="space-y-2">
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Learning analytics
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Topic mastery tracking
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-400" />
-                      <span className="text-sm text-gray-300">
-                        Weekly focus reports
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -574,6 +464,8 @@ function App() {
                   src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80"
                   alt="User avatar"
                   className="w-12 h-12 rounded-full object-cover"
+                  loading="lazy"
+                  onError={(e) => (e.target.src = "/fallback-avatar.png")} // Add a fallback image
                 />
                 <div>
                   <h4 className="font-bold">Sarah Johnson</h4>
@@ -593,6 +485,8 @@ function App() {
                   src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80"
                   alt="User avatar"
                   className="w-12 h-12 rounded-full object-cover"
+                  loading="lazy"
+                  onError={(e) => (e.target.src = "/fallback-avatar.png")} // Add a fallback image
                 />
                 <div>
                   <h4 className="font-bold">Michael Chen</h4>
@@ -612,6 +506,8 @@ function App() {
                   src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80"
                   alt="User avatar"
                   className="w-12 h-12 rounded-full object-cover"
+                  loading="lazy"
+                  onError={(e) => (e.target.src = "/fallback-avatar.png")} // Add a fallback image
                 />
                 <div>
                   <h4 className="font-bold">Emily Rodriguez</h4>
@@ -640,17 +536,15 @@ function App() {
               your goals.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <button className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                Get Started — It's Free
-              </button>
-              <button className="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                Learn More
+              <button onClick={() => navigate("/auth")} className="relative px-4 py-3 rounded-lg w-[140px] cursor-pointer transition-all duration-300 ease-in-out bg-gradient-to-r from-[#2563eb] to-[#3b82f6] text-white font-medium shadow-lg hover:from-[#1e40af] hover:to-[#1d4ed8] hover:scale-105 active:scale-95 overflow-hidden group">
+                <span className="relative z-10">Get Started</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 ease-in-out transform -translate-x-full group-hover:translate-x-0"></div>
               </button>
             </div>
           </div>
 
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
         </div>
       </section>
 
@@ -659,9 +553,9 @@ function App() {
           <div className="grid md:grid-cols-4 gap-8 mb-12">
             <div>
               <div className="flex items-center space-x-2 mb-6">
-                <Play className="h-6 w-6 text-purple-400 fill-purple-400" />
+                <Play className="h-6 w-6 text-blue-400 fill-blue-400" />{" "}
                 <span className="text-xl font-bold">
-                  tube<span className="text-purple-300">io</span>
+                  tube<span className="text-blue-300">io</span>{" "}
                 </span>
               </div>
               <p className="text-gray-300">
@@ -725,36 +619,6 @@ function App() {
                     className="text-gray-300 hover:text-white transition-colors"
                   >
                     Careers
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold mb-4">Legal</h4>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-300 hover:text-white transition-colors"
-                  >
-                    Privacy
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-300 hover:text-white transition-colors"
-                  >
-                    Terms
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-300 hover:text-white transition-colors"
-                  >
-                    Cookie Policy
                   </a>
                 </li>
               </ul>

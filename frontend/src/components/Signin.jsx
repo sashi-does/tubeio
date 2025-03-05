@@ -49,7 +49,7 @@ export default function SignIn({ onToggle }) {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white/10 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-gray-300"
+            className="w-full pl-10 pr-4 py-3 bg-white/10 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-gray-300"
             placeholder="Email address"
             required
           />
@@ -61,7 +61,7 @@ export default function SignIn({ onToggle }) {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white/10 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-gray-300"
+            className="w-full pl-10 pr-4 py-3 bg-white/10 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-gray-300"
             placeholder="Password"
             required
           />
@@ -72,24 +72,37 @@ export default function SignIn({ onToggle }) {
             <input type="checkbox" className="mr-2 bg-white/10 border-gray-500" />
             Remember me
           </label>
-          <a href="#" className="text-purple-300 hover:text-white">Forgot password?</a>
+          <a href="#" className="text-blue-400 hover:text-blue-300">Forgot password?</a>
         </div>
-
+        
         <button
-          type="submit"
-          className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all ${loading ? "bg-gray-500 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-800"}`}
-          disabled={loading}
-        >
-          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogIn className="h-5 w-5" />}
-          {loading ? "Signing In..." : "Sign In"}
-        </button>
+  type="submit"
+  className={`w-full cursor-pointer flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all duration-300 ease-in-out relative overflow-hidden group ${
+    loading 
+      ? "bg-gray-500 cursor-not-allowed shadow-md" 
+      : "bg-gradient-to-r from-[#2563eb] to-[#3b82f6] text-white shadow-lg  hover:scale-105 active:scale-95"
+  }`}
+  disabled={loading}
+>
+  <span className="relative z-10 flex items-center gap-2">
+    {loading ? (
+      <Loader2 className="h-5 w-5 animate-spin" />
+    ) : (
+      <LogIn className="h-5 w-5" />
+    )}
+    {loading ? "Signing In..." : "Sign In"}
+  </span>
+  {!loading && (
+    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 ease-in-out transform -translate-x-full group-hover:translate-x-0"></div>
+  )}
+</button>
 
         {errMsg && <span className="text-red-400 text-sm mt-0 mb-0">{errMsg}</span>}
       </form>
 
       <p className="mt-6 text-center text-gray-300">
         Don't have an account? {" "}
-        <button onClick={onToggle} className="text-purple-300 hover:text-white font-medium">
+        <button onClick={onToggle} className="text-blue-400 cursor-pointer hover:text-blue-300 font-medium">
           Sign up
         </button>
       </p>

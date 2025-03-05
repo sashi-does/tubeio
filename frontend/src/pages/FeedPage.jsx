@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback, useRef } from "react";
 import { Search, X } from "lucide-react";
-import Heading from "../components/Heading";
 import context from "../context/Context";
 import VideoItem from "../components/VideoItem";
 import FilterSection from "./FilterSection";
@@ -8,86 +7,116 @@ import axios from "axios";
 
 const apiKey = import.meta.env.VITE_YOUTUBE_DATA_API_KEY;
 const apiUrl = import.meta.env.VITE_YOUTUBE_SEARCH_API;
+const videoApiUrl = import.meta.env.VITE_YOUTUBE_VIDEO_API;
 
-const FeedPage = ({ param }) => {
-  const [isLoading, setIsLoading] = useState(false); // Changed to false initially
+const FeedPage = ({ param, search, setSearch, submitHandler, clearSearch }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [videos, setVideos] = useState([]);
-  const [search, setSearch] = useState("");
   const [showPremium, setShowPremium] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState([]);
+  const [pageToken, setPageToken] = useState("");
+  const [hasMore, setHasMore] = useState(true);
   const { theme } = useContext(context);
 
-  const fetchVideos = async (query) => {
+  const observerRef = useRef(null);
+
+  const fetchVideos = async (query, token = "", append = false) => {
+    if (!hasMore && append) return;
     setIsLoading(true);
     try {
       const searchQuery =
         query || (selectedFilter.length > 0 ? selectedFilter[0] : "Entrepreneurship");
-      const url = `${apiUrl}?key=${apiKey}&q=${searchQuery}&part=snippet&type=video&maxResults=40`;
+      const url = `${apiUrl}?key=${apiKey}&q=${searchQuery}&part=snippet&type=video&maxResults=20&order=relevance&videoDuration=medium&publishedAfter=${new Date(
+        Date.now() - 30 * 24 * 60 * 60 * 1000
+      ).toISOString()}&relevanceLanguage=en®ionCode=US${token ? `&pageToken=${token}` : ""}`;
       const response = await axios.get(url);
-      const videos = response.data.items;
+      const videoItems = response.data.items;
 
-      const modifiedData = videos.map((videoItem) => ({
-        id: videoItem.id.videoId,
-        title: videoItem.snippet.title,
-        thumbnailUrl: videoItem.snippet.thumbnails.high.url,
-        publishedAt: videoItem.snippet.publishedAt,
-        viewCount: 1000,
-        channel: {
-          name: videoItem.snippet.channelTitle,
-          profileImageUrl: videoItem.snippet.thumbnails.default.url,
-        },
-      }));
-      setVideos(modifiedData);
+      if (!videoItems || videoItems.length === 0) {
+        setHasMore(false);
+        setVideos(append ? videos : []);
+        return;
+      }
+      const videoIds = videoItems.map((item) => item.id.videoId).join(",");
+      const statsUrl = `${videoApiUrl}${videoIds}&key=${apiKey}`;
+      const statsResponse = await axios.get(statsUrl);
+      const stats = statsResponse.data.items;
+      const modifiedData = videoItems.map((videoItem, index) => {
+        const statsItem = stats[index];
+        return {
+          id: videoItem.id.videoId,
+          title: videoItem.snippet.title,
+          thumbnailUrl: videoItem.snippet.thumbnails.high.url,
+          publishedAt: videoItem.snippet.publishedAt,
+          viewCount: parseInt(statsItem?.statistics?.viewCount || 0),
+          channel: {
+            name: videoItem.snippet.channelTitle,
+            profileImageUrl: videoItem.snippet.thumbnails.default.url,
+          },
+        };
+      });
+
+      setVideos((prevVideos) =>
+        append ? [...prevVideos, ...modifiedData] : modifiedData
+      );
+
+      setPageToken(response.data.nextPageToken || "");
+      setHasMore(!!response.data.nextPageToken);
     } catch (e) {
       console.log("Error occurred:", e);
+      setHasMore(false);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchVideos("Entrepreneurship"); // Initial fetch
+    fetchVideos("Entrepreneurship");
   }, []);
 
   useEffect(() => {
     if (selectedFilter.length > 0) {
-      fetchVideos(selectedFilter[0]); // Fetch when filter changes
+      fetchVideos(selectedFilter[0]);
     } else if (!search) {
-      fetchVideos("Entrepreneurship"); // Default to "Entrepreneurship" if no filter or search
+      fetchVideos("Entrepreneurship");
+    } else {
+      fetchVideos(search);
     }
-  }, [selectedFilter]);
+  }, [selectedFilter, search]);
 
-  const submitHandler = (e) => {
-    e.preventDefault();
-    if (!search.trim()) {
-      alert("Please enter a search term!");
-      return;
-    }
-    fetchVideos(search);
+  const lastVideoElementRef = useCallback(
+    (node) => {
+      if (isLoading) return;
+      if (observerRef.current) observerRef.current.disconnect();
+
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          fetchVideos(
+            search || (selectedFilter.length > 0 ? selectedFilter[0] : "Entrepreneurship"),
+            pageToken,
+            true
+          );
+        }
+      });
+
+      if (node) observerRef.current.observe(node);
+    },
+    [isLoading, hasMore, pageToken, search, selectedFilter]
+  );
+
+  const handleFilterChange = (filter) => {
+    setSelectedFilter(filter);
+    setPageToken("");
+    setHasMore(true);
   };
 
   const hidePremium = () => {
     setShowPremium(false);
   };
 
-  const onChangeSearch = (e) => {
-    setSearch(e.target.value);
-  };
-
-  const clearSearch = () => {
-    setSearch("");
-    fetchVideos(selectedFilter.length > 0 ? selectedFilter[0] : "Entrepreneurship");
-  };
-
-  const handleFilterChange = (filter) => {
-    setSelectedFilter(filter);
-  };
-
   return (
     <div
-      className={`mt-[64px] min-h-screen flex-grow overflow-y-auto ${
-        theme ? "bg-gray-50" : "bg-gray-900 text-white"
-      }`}
+      className={`flex-grow mt-16 ${theme ? "bg-gray-50" : "bg-gray-900 text-white"}`} // Add mt-16 to push content below Navbar
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {showPremium && (
@@ -138,73 +167,36 @@ const FeedPage = ({ param }) => {
           onFilterChange={handleFilterChange}
           selectedFilter={selectedFilter}
         />
-        <div className="mb-8">
-          <Heading name={param} />
-        </div>
 
-        <form onSubmit={submitHandler} className="relative max-w-2xl mb-8">
-          <div className={`flex items-center rounded-lg shadow-sm ${theme ? "bg-white" : "bg-gray-800"}`}>
-            <div className="relative flex-grow">
-              <input
-                type="text"
-                placeholder="Search videos..."
-                value={search}
-                onChange={onChangeSearch}
-                onKeyDown={(e) => e.key === "Enter" && submitHandler(e)}
-                className={`w-full pl-4 pr-10 py-3 rounded-l-lg border-0 outline-none transition-colors ${
-                  theme
-                    ? "bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500/20"
-                    : "bg-gray-800 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-primary-500/20"
-                }`}
-              />
-              {search && (
-                <button
-                  onClick={clearSearch}
-                  className={`absolute cursor-pointer right-2 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors
-                    ${
-                      theme
-                        ? "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-                        : "text-gray-500 hover:text-gray-300 hover:bg-gray-700"
-                    }`}
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-            <button
-              className={`px-6 py-3 rounded-r-lg transition-colors flex items-center
-                ${
-                  theme
-                    ? "bg-primary-500 text-white hover:bg-primary-600"
-                    : "bg-primary-600 text-white hover:bg-primary-700"
-                }`}
-            >
-              <Search className="w-5 h-5" />
-            </button>
-          </div>
-        </form>
-
-        {/* Videos Section with Conditional Loader */}
         <div>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="animate-pulse-slow">
-                <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            </div>
-          ) : videos.length > 0 ? (
+          {videos.length > 0 ? (
             <ul className="list-none grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videos.map((video) => (
-                <VideoItem key={video.id} param={param} details={video} />
-              ))}
+              {videos.map((video, index) => {
+                if (index === videos.length - 1) {
+                  return (
+                    <li ref={lastVideoElementRef} key={video.id}>
+                      <VideoItem param={param} details={video} />
+                    </li>
+                  );
+                }
+                return <VideoItem key={video.id} param={param} details={video} />;
+              })}
             </ul>
-          ) : (
+          ) : !isLoading ? (
             <div className={`text-center py-16 ${theme ? "text-gray-500" : "text-gray-400"}`}>
               <Search className="w-16 h-16 mx-auto mb-4 opacity-40" />
               <h3 className="text-lg font-medium mb-2">No videos found</h3>
               <p className="text-sm">
                 Try adjusting your search or filter to find what you're looking for.
               </p>
+            </div>
+          ) : null}
+
+          {isLoading && (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-pulse-slow">
+                <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
             </div>
           )}
         </div>

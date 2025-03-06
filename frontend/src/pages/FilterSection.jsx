@@ -9,13 +9,12 @@ const FilterSection = ({ onFilterChange, selectedFilter }) => {
 
   const fetchNiches = async () => {
     try {
-      const url = import.meta.env.VITE_FORM_STATUS_API + "/get-niches";
+      const url = import.meta.env.VITE_HANDLE_FORM_API + "/get-niches";
       const response = await axios.get(url, {
         headers: { authorization: `Bearer ${Cookies.get("jwtToken")}` },
       });
       const fetchedNiches = response.data.niches;
       setNiches(fetchedNiches);
-      // Set the first niche as default selected filter
       if (fetchedNiches.length > 0 && selectedFilter.length === 0) {
         onFilterChange([fetchedNiches[0]]);
       }
@@ -30,7 +29,7 @@ const FilterSection = ({ onFilterChange, selectedFilter }) => {
 
   const handleFilterClick = (niche) => {
     if (onFilterChange) {
-      onFilterChange([niche]); // Pass selected niche as an array
+      onFilterChange([niche]); 
     }
   };
 
@@ -46,7 +45,7 @@ const FilterSection = ({ onFilterChange, selectedFilter }) => {
             key={index}
             onClick={() => handleFilterClick(niche)}
             className={`px-4 py-2 rounded-lg cursor-pointer transition-colors duration-200 ${
-              selectedFilter.includes(niche) // Highlight if niche is in selectedFilter
+              selectedFilter.includes(niche) 
                 ? !theme
                   ? "bg-[#2865c1] text-white"
                   : "bg-amber-600 text-white"

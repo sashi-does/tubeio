@@ -20,24 +20,23 @@ const MultiStepForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState(false);
-  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true); // New state for checking onboarding status
+  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true); 
   const interestsRef = useRef(null);
   const discoveryMethodRef = useRef(null);
   const mainGoalRef = useRef(null);
 
-  // Check onboarding status on component mount
   useEffect(() => {
     const checkOnboardingStatus = async () => {
       try {
         const isCompleted = await isCompletedOnboarding();
         setIsOnboardingCompleted(isCompleted);
         if (isCompleted) {
-          navigate('/feed'); // Navigate to /feed if onboarding is completed
+          navigate('/feed'); 
         }
       } catch (error) {
         console.error('Error checking onboarding status:', error);
       } finally {
-        setIsCheckingOnboarding(false); // Set loading state to false after API call
+        setIsCheckingOnboarding(false); 
       }
     };
 
@@ -158,11 +157,11 @@ const MultiStepForm = () => {
     setIsLoading(true);
     try {
       const url = import.meta.env.VITE_HANDLE_FORM_API + '/add-niche';
-      const response = await axios.post(url, { niches: formData.interests }, {
+      await axios.post(url, { niches: formData.interests }, {
         headers: { authorization: `Bearer ${Cookies.get('jwtToken')}` },
       });
       setIsSubmitted(true);
-      const formStatusUrl = import.meta.env.VITE_FORM_STATUS_API + '/complete-step';
+      const formStatusUrl = import.meta.env.VITE_HANDLE_FORM_API + '/complete-step';
       await axios.patch(formStatusUrl, {}, { headers: { authorization: `Bearer ${Cookies.get('jwtToken')}` } });
       navigate('/feed');
     } catch (error) {
@@ -174,9 +173,9 @@ const MultiStepForm = () => {
   };
 
   const isCompletedOnboarding = async () => {
-    const url = import.meta.env.VITE_FORM_STATUS_API + '/status';
+    const url = import.meta.env.VITE_HANDLE_FORM_API + '/status';
     const response = await axios.get(url, { headers: { authorization: `Bearer ${Cookies.get('jwtToken')}` } });
-    return response.data.form_status; // Ensure the backend returns { form_status: true/false }
+    return response.data.form_status; 
   };
 
   const discoveryMethods = [
@@ -195,7 +194,6 @@ const MultiStepForm = () => {
     'Other',
   ];
 
-  // Display loading state while checking onboarding status
   if (isCheckingOnboarding) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
@@ -204,9 +202,8 @@ const MultiStepForm = () => {
     );
   }
 
-  // If onboarding is completed, don't render the form
   if (isOnboardingCompleted) {
-    return null; // Or a loading spinner while navigating
+    return null; 
   }
 
   if (isSubmitted) {

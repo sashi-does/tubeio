@@ -6,7 +6,7 @@ import userPreferencesRouter from './routes/userPreferencesRoute.js'
 import watchLaterRouter from './routes/watchLaterRoute.js'
 
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 
 mongoDB();
 

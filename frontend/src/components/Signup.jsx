@@ -4,7 +4,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
-export default function SignUp({ onToggle }) {
+export default function Signup({ onToggle }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [errMsg, setErrMsg] = useState("");

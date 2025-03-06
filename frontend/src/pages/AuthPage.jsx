@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import SignIn from "../components/SignIn";
-import SignUp from "../components/SignUp";
+import Signin from "../components/Signin";
+import Signup from "../components/Signup";
 import { motion, AnimatePresence } from "framer-motion";
 
 function AuthPage() {
@@ -43,7 +43,7 @@ function AuthPage() {
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.3 }}
             >
-              <SignIn
+              <Signin
                 onToggle={() => setIsSignIn(false)}
                 buttonColor="#2D5EFF"
                 inputFocusColor="#4A3AFF"
@@ -57,7 +57,7 @@ function AuthPage() {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <SignUp
+              <Signup
                 onToggle={() => setIsSignIn(true)}
                 buttonColor="#2D5EFF"
                 inputFocusColor="#4A3AFF"

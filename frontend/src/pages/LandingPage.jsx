@@ -40,7 +40,7 @@ function App() {
   };
 
   useEffect(() => {
-    console.log("App component mounted"); 
+    console.log("App component mounted");
 
     try {
       gsap.fromTo(
@@ -291,8 +291,15 @@ function App() {
         className="py-20 px-6 md:px-12 bg-gradient-to-b from-transparent to-gray-900/50"
       >
         <div className="max-w-7xl mx-auto text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            How TubeIO Helps You Focus
+          <h2 className="hero-title text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[3rem] mb-6 tracking-tight">
+            How{" "}
+            <span className="relative">
+              <span className="bg-gradient-to-r from-[#1b4ed0] to-[#5473c1] bg-clip-text text-transparent">
+                TubeIO
+              </span>
+              <span className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-[#1b4ed0] to-[#5473c1] opacity-50"></span>
+            </span>{" "}
+            Helps You Focus
           </h2>
           <p className="text-lg text-gray-300 max-w-2xl mx-auto">
             We've reimagined video content consumption to eliminate distractions
@@ -536,7 +543,10 @@ function App() {
               your goals.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <button onClick={() => navigate("/auth")} className="relative px-4 py-3 rounded-lg w-[140px] cursor-pointer transition-all duration-300 ease-in-out bg-gradient-to-r from-[#2563eb] to-[#3b82f6] text-white font-medium shadow-lg hover:from-[#1e40af] hover:to-[#1d4ed8] hover:scale-105 active:scale-95 overflow-hidden group">
+              <button
+                onClick={() => navigate("/auth")}
+                className="relative px-4 py-3 rounded-lg w-[140px] cursor-pointer transition-all duration-300 ease-in-out bg-gradient-to-r from-[#2563eb] to-[#3b82f6] text-white font-medium shadow-lg hover:from-[#1e40af] hover:to-[#1d4ed8] hover:scale-105 active:scale-95 overflow-hidden group"
+              >
                 <span className="relative z-10">Get Started</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 ease-in-out transform -translate-x-full group-hover:translate-x-0"></div>
               </button>
@@ -553,10 +563,7 @@ function App() {
           <div className="grid md:grid-cols-4 gap-8 mb-12">
             <div>
               <div className="flex items-center space-x-2 mb-6">
-                <Play className="h-6 w-6 text-blue-400 fill-blue-400" />{" "}
-                <span className="text-xl font-bold">
-                  tube<span className="text-blue-300">io</span>{" "}
-                </span>
+                <img src="https://res.cloudinary.com/dvukdxs2m/image/upload/v1739785683/tubeio-dark_huj4uc.png" alt="Logo" className="h-6" />
               </div>
               <p className="text-gray-300">
                 The distraction-free video platform focused on productive

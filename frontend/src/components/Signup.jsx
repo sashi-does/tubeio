@@ -18,6 +18,7 @@ export default function Signup({ onToggle }) {
     setErrMsg("");
     try {
       const url = import.meta.env.VITE_TUBEIO_SIGNUP_API;
+      console.log(url);
       const user = { username: name, email, password };
       const response = await axios.post(url, user);
 

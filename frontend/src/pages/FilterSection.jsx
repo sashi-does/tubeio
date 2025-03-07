@@ -3,7 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import Context from "../context/Context";
 
-const FilterSection = ({ onFilterChange, selectedFilter }) => {
+const FilterSection = ({ onFilterChange, selectedFilter, isLoading }) => {
   const [niches, setNiches] = useState([]);
   const { theme } = useContext(Context);
 
@@ -28,8 +28,9 @@ const FilterSection = ({ onFilterChange, selectedFilter }) => {
   }, []);
 
   const handleFilterClick = (niche) => {
+    if (isLoading) return; // Prevent clicking while loading
     if (onFilterChange) {
-      onFilterChange([niche]); 
+      onFilterChange([niche]);
     }
   };
 
@@ -45,14 +46,14 @@ const FilterSection = ({ onFilterChange, selectedFilter }) => {
             key={index}
             onClick={() => handleFilterClick(niche)}
             className={`px-4 py-2 rounded-lg cursor-pointer transition-colors duration-200 ${
-              selectedFilter.includes(niche) 
+              selectedFilter.includes(niche)
                 ? !theme
                   ? "bg-[#2865c1] text-white"
                   : "bg-amber-600 text-white"
                 : !theme
-                ? "bg-gray-700 text-gray-100 hover:bg-gray-600"
-                : "bg-gray-200 text-gray-900 hover:bg-gray-300"
-            }`}
+                ? `bg-gray-700 text-gray-100 ${!isLoading && "hover:bg-gray-600"}`
+                : `bg-gray-200 text-gray-900 ${!isLoading && "hover:bg-gray-300"}`
+            } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`} // Disable styling
           >
             <span className="font-medium">{niche}</span>
           </div>

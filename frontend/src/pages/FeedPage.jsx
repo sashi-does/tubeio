@@ -26,9 +26,10 @@ const FeedPage = ({ param, search, setSearch, submitHandler, clearSearch }) => {
     try {
       const searchQuery =
         query || (selectedFilter.length > 0 ? selectedFilter[0] : "Entrepreneurship");
-      const url = `${apiUrl}?key=${apiKey}&q=${searchQuery}&part=snippet&type=video&maxResults=20&order=relevance&videoDuration=medium&publishedAfter=${new Date(
-        Date.now() - 30 * 24 * 60 * 60 * 1000
-      ).toISOString()}&relevanceLanguage=en®ionCode=US${token ? `&pageToken=${token}` : ""}`;
+        const url = `${apiUrl}?key=${apiKey}&q=${searchQuery}&part=snippet&type=video&maxResults=20&order=relevance&videoDuration=medium&publishedAfter=${new Date(
+          Date.now() - 30 * 24 * 60 * 60 * 1000
+        ).toISOString()}&relevanceLanguage=en&regionCode=US${token ? `&pageToken=${token}` : ""}`;
+        
       const response = await axios.get(url);
       const videoItems = response.data.items;
 
@@ -66,20 +67,14 @@ const FeedPage = ({ param, search, setSearch, submitHandler, clearSearch }) => {
       console.log("Error occurred:", e);
       setHasMore(false);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); 
     }
   };
 
   useEffect(() => {
-    fetchVideos("Entrepreneurship");
-  }, []);
-
-  useEffect(() => {
     if (selectedFilter.length > 0) {
       fetchVideos(selectedFilter[0]);
-    } else if (!search) {
-      fetchVideos("Entrepreneurship");
-    } else {
+    } else if (search) {
       fetchVideos(search);
     }
   }, [selectedFilter, search]);
@@ -116,7 +111,7 @@ const FeedPage = ({ param, search, setSearch, submitHandler, clearSearch }) => {
 
   return (
     <div
-      className={`flex-grow mt-16 ${theme ? "bg-gray-50" : "bg-gray-900 text-white"}`} // Add mt-16 to push content below Navbar
+      className={`flex-grow mt-16 ${theme ? "bg-gray-50" : "bg-gray-900 text-white"}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {showPremium && (
@@ -166,10 +161,17 @@ const FeedPage = ({ param, search, setSearch, submitHandler, clearSearch }) => {
         <FilterSection
           onFilterChange={handleFilterChange}
           selectedFilter={selectedFilter}
+          isLoading={isLoading} // Pass loading state to disable filter items
         />
 
         <div>
-          {videos.length > 0 ? (
+          {isLoading && !videos.length ? ( // Show loader when initial fetch is happening
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-pulse-slow">
+                <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            </div>
+          ) : videos.length > 0 ? (
             <ul className="list-none grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {videos.map((video, index) => {
                 if (index === videos.length - 1) {
@@ -182,7 +184,7 @@ const FeedPage = ({ param, search, setSearch, submitHandler, clearSearch }) => {
                 return <VideoItem key={video.id} param={param} details={video} />;
               })}
             </ul>
-          ) : !isLoading ? (
+          ) : (
             <div className={`text-center py-16 ${theme ? "text-gray-500" : "text-gray-400"}`}>
               <Search className="w-16 h-16 mx-auto mb-4 opacity-40" />
               <h3 className="text-lg font-medium mb-2">No videos found</h3>
@@ -190,9 +192,9 @@ const FeedPage = ({ param, search, setSearch, submitHandler, clearSearch }) => {
                 Try adjusting your search or filter to find what you're looking for.
               </p>
             </div>
-          ) : null}
+          )}
 
-          {isLoading && (
+          {isLoading && videos.length > 0 && ( // Show loader for subsequent fetches (infinite scroll)
             <div className="flex items-center justify-center py-8">
               <div className="animate-pulse-slow">
                 <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>

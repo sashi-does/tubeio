@@ -157,6 +157,7 @@ const MultiStepForm = () => {
     setIsLoading(true);
     try {
       const url = import.meta.env.VITE_HANDLE_FORM_API + '/add-niche';
+      console.log(url)
       await axios.post(url, { niches: formData.interests }, {
         headers: { authorization: `Bearer ${Cookies.get('jwtToken')}` },
       });

@@ -5,22 +5,31 @@ import FeedPage from "./FeedPage";
 
 const HomePage = () => {
   const [search, setSearch] = useState("");
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(true); 
+  const [searchQuery, setSearchQuery] = useState(""); 
+  
+
+  const toggleTheme = () => {
+    setTheme((prevTheme) => !prevTheme);
+  };
 
   const onChangeSearch = (e) => {
-    setSearch(e.target.value);
+    setSearch(e.target.value); 
   };
 
   const clearSearch = () => {
-    setSearch("");
+    setSearch(""); 
+    setSearchQuery("");
   };
 
   const submitHandler = (e) => {
-    e.preventDefault();
+    e.preventDefault(); 
     if (!search.trim()) {
       alert("Please enter a search term!");
       return;
     }
-    // The actual fetch logic will be handled in FeedPage
+    setSearchQuery(search); 
   };
 
   return (
@@ -30,14 +39,18 @@ const HomePage = () => {
         onChangeSearch={onChangeSearch}
         submitHandler={submitHandler}
         clearSearch={clearSearch}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        isMobileMenuOpen={isMobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
       />
-      <div className="flex flex-grow">
-        <LeftNavbar />
-        <div className="flex-grow">
+      <div className="flex flex-grow mt-10">
+        <LeftNavbar isMobileMenuOpen={isMobileMenuOpen} />
+        <div className="flex-grow h-full overflow-y-auto">
           <FeedPage
             param="all"
-            search={search}
-            setSearch={setSearch} // Pass setSearch for clearSearch in FeedPage
+            search={searchQuery} 
+            setSearch={setSearch}
             submitHandler={submitHandler}
             clearSearch={clearSearch}
           />

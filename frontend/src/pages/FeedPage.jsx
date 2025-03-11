@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback, useRef } from "react";
 import { Search, X } from "lucide-react";
-import context from "../context/Context";
+import Context from "../context/Context";
 import VideoItem from "../components/VideoItem";
 import FilterSection from "./FilterSection";
 import axios from "axios";
@@ -9,27 +9,29 @@ const apiKey = import.meta.env.VITE_YOUTUBE_DATA_API_KEY;
 const apiUrl = import.meta.env.VITE_YOUTUBE_SEARCH_API;
 const videoApiUrl = import.meta.env.VITE_YOUTUBE_VIDEO_API;
 
-const FeedPage = ({ param, search, setSearch, submitHandler, clearSearch }) => {
-  const [isLoading, setIsLoading] = useState(false);
+const FeedPage = ({ param, search }) => {
+  const [isLoading, setIsLoading] = useState(true); // Initial loading state
   const [videos, setVideos] = useState([]);
   const [showPremium, setShowPremium] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState([]);
   const [pageToken, setPageToken] = useState("");
   const [hasMore, setHasMore] = useState(true);
-  const { theme } = useContext(context);
+  const [error, setError] = useState(null); // To handle API errors
+  const { theme } = useContext(Context);
 
   const observerRef = useRef(null);
 
   const fetchVideos = async (query, token = "", append = false) => {
     if (!hasMore && append) return;
     setIsLoading(true);
+    setError(null); // Reset error state
     try {
       const searchQuery =
         query || (selectedFilter.length > 0 ? selectedFilter[0] : "Entrepreneurship");
-        const url = `${apiUrl}?key=${apiKey}&q=${searchQuery}&part=snippet&type=video&maxResults=20&order=relevance&videoDuration=medium&publishedAfter=${new Date(
-          Date.now() - 30 * 24 * 60 * 60 * 1000
-        ).toISOString()}&relevanceLanguage=en&regionCode=US${token ? `&pageToken=${token}` : ""}`;
-        
+      const url = `${apiUrl}?key=${apiKey}&q=${searchQuery}&part=snippet&type=video&maxResults=20&order=relevance&videoDuration=medium&publishedAfter=${new Date(
+        Date.now() - 30 * 24 * 60 * 60 * 1000
+      ).toISOString()}&relevanceLanguage=en&regionCode=US${token ? `&pageToken=${token}` : ""}`;
+
       const response = await axios.get(url);
       const videoItems = response.data.items;
 
@@ -38,10 +40,12 @@ const FeedPage = ({ param, search, setSearch, submitHandler, clearSearch }) => {
         setVideos(append ? videos : []);
         return;
       }
+
       const videoIds = videoItems.map((item) => item.id.videoId).join(",");
       const statsUrl = `${videoApiUrl}${videoIds}&key=${apiKey}`;
       const statsResponse = await axios.get(statsUrl);
       const stats = statsResponse.data.items;
+
       const modifiedData = videoItems.map((videoItem, index) => {
         const statsItem = stats[index];
         return {
@@ -65,19 +69,19 @@ const FeedPage = ({ param, search, setSearch, submitHandler, clearSearch }) => {
       setHasMore(!!response.data.nextPageToken);
     } catch (e) {
       console.log("Error occurred:", e);
+      setError("Failed to fetch videos. Please try again."); // Set error message
       setHasMore(false);
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   };
 
+  // Fetch videos only when the search query changes
   useEffect(() => {
-    if (selectedFilter.length > 0) {
-      fetchVideos(selectedFilter[0]);
-    } else if (search) {
+    if (search) {
       fetchVideos(search);
     }
-  }, [selectedFilter, search]);
+  }, [search]);
 
   const lastVideoElementRef = useCallback(
     (node) => {
@@ -103,6 +107,7 @@ const FeedPage = ({ param, search, setSearch, submitHandler, clearSearch }) => {
     setSelectedFilter(filter);
     setPageToken("");
     setHasMore(true);
+    fetchVideos(filter[0]); // Fetch videos based on the selected filter
   };
 
   const hidePremium = () => {
@@ -111,7 +116,7 @@ const FeedPage = ({ param, search, setSearch, submitHandler, clearSearch }) => {
 
   return (
     <div
-      className={`flex-grow mt-16 ${theme ? "bg-gray-50" : "bg-gray-900 text-white"}`}
+      className={`flex-grow min-h-[calc(100vh-64px)] ${theme ? "bg-gray-50" : "bg-gray-900 text-white"}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {showPremium && (
@@ -158,49 +163,49 @@ const FeedPage = ({ param, search, setSearch, submitHandler, clearSearch }) => {
             </div>
           </div>
         )}
+
         <FilterSection
           onFilterChange={handleFilterChange}
           selectedFilter={selectedFilter}
-          isLoading={isLoading} // Pass loading state to disable filter items
+          isLoading={isLoading}
         />
 
         <div>
-          {isLoading && !videos.length ? ( // Show loader when initial fetch is happening
+          {isLoading && !videos.length ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-pulse-slow">
                 <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
             </div>
-          ) : videos.length > 0 ? (
-            <ul className="list-none grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videos.map((video, index) => {
-                if (index === videos.length - 1) {
-                  return (
-                    <li ref={lastVideoElementRef} key={video.id}>
-                      <VideoItem param={param} details={video} />
-                    </li>
-                  );
-                }
-                return <VideoItem key={video.id} param={param} details={video} />;
-              })}
-            </ul>
-          ) : (
+          ) : error ? (
             <div className={`text-center py-16 ${theme ? "text-gray-500" : "text-gray-400"}`}>
               <Search className="w-16 h-16 mx-auto mb-4 opacity-40" />
               <h3 className="text-lg font-medium mb-2">No videos found</h3>
-              <p className="text-sm">
-                Try adjusting your search or filter to find what you're looking for.
-              </p>
+              <p className="text-sm">{error}</p>
             </div>
-          )}
-
-          {isLoading && videos.length > 0 && ( // Show loader for subsequent fetches (infinite scroll)
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-pulse-slow">
-                <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            </div>
-          )}
+          ) : videos.length > 0 ? (
+            <>
+              <ul className="list-none grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {videos.map((video, index) => {
+                  if (index === videos.length - 1) {
+                    return (
+                      <li ref={lastVideoElementRef} key={video.id}>
+                        <VideoItem param={param} details={video} />
+                      </li>
+                    );
+                  }
+                  return <VideoItem key={video.id} param={param} details={video} />;
+                })}
+              </ul>
+              {isLoading && videos.length > 0 && (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-pulse-slow">
+                    <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : null}
         </div>
       </div>
     </div>

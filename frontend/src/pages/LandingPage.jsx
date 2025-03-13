@@ -254,7 +254,7 @@ function App() {
               video content tailored to your interests.
             </p>
             <div className="hero-cta flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <button className="relative px-4 py-3 rounded-lg w-[140px] cursor-pointer transition-all duration-300 ease-in-out bg-gradient-to-r from-[#2563eb] to-[#3b82f6] text-white font-medium shadow-lg hover:from-[#1e40af] hover:to-[#1d4ed8] hover:scale-105 active:scale-95 overflow-hidden group">
+              <button onClick={() => navigate("/auth")} className="relative px-4 py-3 rounded-lg w-[140px] cursor-pointer transition-all duration-300 ease-in-out bg-gradient-to-r from-[#2563eb] to-[#3b82f6] text-white font-medium shadow-lg hover:from-[#1e40af] hover:to-[#1d4ed8] hover:scale-105 active:scale-95 overflow-hidden group">
                 <span className="relative z-10">Get Started</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 ease-in-out transform -translate-x-full group-hover:translate-x-0"></div>
               </button>

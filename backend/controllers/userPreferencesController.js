@@ -3,16 +3,12 @@ import jwt from 'jsonwebtoken';
 
 const addNiche = async (req, res) => {
     const niches = req.body.niches;
-    console.log(niches)
-    console.log(req.headers);
-    console.log("sashi");
 
     if (!req.headers.authorization) {
         return res.status(401).json({ message: "Authorization header is missing" });
     }
 
     const token = req.headers.authorization.split(" ")[1];
-    console.log(token + " sasji ")
 
     if (!token) {
         return res.status(401).json({ message: "JWT token is missing" });

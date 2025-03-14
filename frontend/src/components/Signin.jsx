@@ -18,6 +18,7 @@ export default function Signin({ onToggle }) {
     try {
       const user = { email, password };
       const url = import.meta.env.VITE_TUBEIO_LOGIN_API;
+      console.log(url)
       const response = await axios.post(url, user);
       const data = response.data;
 
